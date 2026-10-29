@@ -2,7 +2,7 @@
 // Texte werden immer mit textContent eingefügt (nie als HTML).
 import {
   collection, query, orderBy, onSnapshot,
-  addDoc, updateDoc, deleteDoc, doc, serverTimestamp
+  addDoc, updateDoc, deleteDoc, deleteField, doc, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
 import { db } from "./firebase.js";
 
@@ -33,6 +33,30 @@ function formatDate(isoDate) {
   });
 }
 
+// Google-Maps-Link: öffnet die Navigation vom aktuellen Standort zum Flughafen.
+function navigationUrl(place) {
+  return "https://www.google.com/maps/dir/?api=1&destination=" + encodeURIComponent(place);
+}
+
+function flightBox(flight) {
+  const box = el("div", "flight");
+  box.append(el("p", "flight-title", "✈ " + [flight.airline, flight.number].filter(Boolean).join(" · ")));
+  const times = [];
+  if (flight.departure) times.push("Abflug " + flight.departure);
+  if (flight.arrival) times.push("Ankunft " + flight.arrival);
+  if (times.length) box.append(el("p", "line", times.join(" · ")));
+  if (flight.atAirport) box.append(el("p", "line flight-at", "Am Flughafen um " + flight.atAirport));
+  if (flight.airport) {
+    box.append(el("p", "line muted", flight.airport));
+    const link = el("a", "btn small", "Navigation zum Flughafen");
+    link.href = navigationUrl(flight.airport);
+    link.target = "_blank";
+    link.rel = "noopener noreferrer";
+    box.append(link);
+  }
+  return box;
+}
+
 function stopCard(stop, isToday) {
   const card = el("article", isToday ? "card today" : "card");
   const head = el("div", "card-head");
@@ -44,6 +68,7 @@ function stopCard(stop, isToday) {
   if (stop.place) card.append(el("p", "line", "📍 " + stop.place));
   if (stop.accommodation) card.append(el("p", "line", "🛏 " + stop.accommodation));
   if (stop.notes) card.append(el("p", "line muted", stop.notes));
+  if (stop.flight && (stop.flight.airline || stop.flight.departure)) card.append(flightBox(stop.flight));
   return card;
 }
 
@@ -115,6 +140,14 @@ function openForm(stop) {
   $("stop-place").value = stop ? stop.place : "";
   $("stop-accommodation").value = stop ? stop.accommodation : "";
   $("stop-notes").value = stop ? stop.notes : "";
+  const f = (stop && stop.flight) || {};
+  $("flight-airline").value = f.airline || "";
+  $("flight-number").value = f.number || "";
+  $("flight-departure").value = f.departure || "";
+  $("flight-arrival").value = f.arrival || "";
+  $("flight-at-airport").value = f.atAirport || "";
+  $("flight-airport").value = f.airport || "";
+  $("flight-details").open = Boolean(f.airline || f.departure);
   $("btn-delete-stop").hidden = !stop;
   $("stop-dialog").showModal();
 }
@@ -131,12 +164,23 @@ async function saveStop(event) {
     notes: $("stop-notes").value.trim(),
     updatedAt: serverTimestamp()
   };
+  const flight = {
+    airline: $("flight-airline").value.trim(),
+    number: $("flight-number").value.trim(),
+    departure: $("flight-departure").value,
+    arrival: $("flight-arrival").value,
+    atAirport: $("flight-at-airport").value,
+    airport: $("flight-airport").value.trim()
+  };
+  const hasFlight = Object.values(flight).some(Boolean);
   const id = $("stop-id").value;
   try {
     if (id) {
-      await updateDoc(doc(db, "stops", id), data);
+      await updateDoc(doc(db, "stops", id), { ...data, flight: hasFlight ? flight : deleteField() });
     } else {
-      await addDoc(stopsRef, { ...data, createdBy: currentUser.email.toLowerCase() });
+      await addDoc(stopsRef, {
+        ...data, ...(hasFlight && { flight }), createdBy: currentUser.email.toLowerCase()
+      });
     }
     $("stop-dialog").close();
   } catch (err) {
@@ -154,6 +198,17 @@ async function deleteStop() {
     setFormError("Löschen fehlgeschlagen (" + err.code + ").");
   }
 }
+
+// „Am Flughafen um“ wird beim Eintragen des Abflugs mit 2 Stunden Vorlauf vorgeschlagen,
+// solange das Feld noch leer ist. Danach bleibt, was du eingibst.
+$("flight-departure").addEventListener("change", () => {
+  const dep = $("flight-departure").value;
+  if (!dep || $("flight-at-airport").value) return;
+  const [h, m] = dep.split(":").map(Number);
+  const minutes = (h * 60 + m - 120 + 1440) % 1440;
+  $("flight-at-airport").value =
+    String(Math.floor(minutes / 60)).padStart(2, "0") + ":" + String(minutes % 60).padStart(2, "0");
+});
 
 $("btn-add-stop").addEventListener("click", () => openForm(null));
 $("stop-form").addEventListener("submit", saveStop);

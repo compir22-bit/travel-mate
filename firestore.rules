@@ -22,10 +22,24 @@ service cloud.firestore {
       allow list, create, update, delete: if false;
     }
 
+    // Prüft die optionalen Flugangaben einer Station.
+    function validFlight(f) {
+      return f is map
+        && f.keys().hasOnly(['airline', 'number', 'departure', 'arrival', 'atAirport', 'airport'])
+        && f.keys().hasAll(['airline', 'number', 'departure', 'arrival', 'atAirport', 'airport'])
+        && f.airline is string && f.airline.size() <= 60
+        && f.number is string && f.number.size() <= 20
+        && f.departure is string && f.departure.size() <= 5
+        && f.arrival is string && f.arrival.size() <= 5
+        && f.atAirport is string && f.atAirport.size() <= 5
+        && f.airport is string && f.airport.size() <= 100;
+    }
+
     // Prüft die Felder einer Station (Typ, Länge, erlaubte Feldnamen).
     function validStop(d) {
       return d.keys().hasOnly(['date', 'time', 'title', 'place', 'accommodation', 'notes',
-                               'lat', 'lng', 'createdBy', 'updatedAt'])
+                               'lat', 'lng', 'flight', 'createdBy', 'updatedAt'])
+        && (!('flight' in d) || validFlight(d.flight))
         && d.keys().hasAll(['date', 'time', 'title', 'place', 'accommodation', 'notes',
                             'createdBy', 'updatedAt'])
         && d.date is string && d.date.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')

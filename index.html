@@ -114,6 +114,35 @@
         <textarea id="stop-notes" rows="3" maxlength="1000"></textarea>
       </label>
 
+      <details id="flight-details" class="flight-form">
+        <summary>✈ Flug an diesem Tag</summary>
+        <div class="form">
+          <div class="row">
+            <label class="grow">Airline
+              <input id="flight-airline" maxlength="60" placeholder="z.B. Jetstar">
+            </label>
+            <label class="grow">Flugnummer
+              <input id="flight-number" maxlength="20" placeholder="z.B. JQ 520">
+            </label>
+          </div>
+          <div class="row">
+            <label class="grow">Abflug
+              <input id="flight-departure" type="time">
+            </label>
+            <label class="grow">Ankunft
+              <input id="flight-arrival" type="time">
+            </label>
+          </div>
+          <label>Am Flughafen um
+            <input id="flight-at-airport" type="time">
+          </label>
+          <label>Abflughafen
+            <input id="flight-airport" maxlength="100" placeholder="z.B. Sydney Airport (SYD)">
+          </label>
+          <p class="muted small">Zeiten in Ortszeit. Ist nichts ausgefüllt, wird am Tag kein Flug angezeigt.</p>
+        </div>
+      </details>
+
       <p id="stop-error" class="error" role="alert" hidden></p>
       <div class="row">
         <button type="button" id="btn-delete-stop" class="btn danger" hidden>Löschen</button>

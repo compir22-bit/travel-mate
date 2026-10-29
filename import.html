@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <meta http-equiv="Content-Security-Policy" content="
+    default-src 'none';
+    script-src 'self' https://www.gstatic.com https://apis.google.com;
+    style-src 'self';
+    img-src 'self' data: https://*.googleusercontent.com;
+    connect-src 'self' https://*.googleapis.com https://*.firebaseio.com wss://*.firebaseio.com;
+    frame-src https://travel-mate-6e946.firebaseapp.com https://accounts.google.com;
+    base-uri 'self';
+    form-action 'self'">
+  <title>Import · Travel Mate</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <main>
+    <h1>Reiseplan importieren</h1>
+    <p class="muted">Liest <code>import/stops.json</code> (nur lokal vorhanden) und legt die Tage in der Datenbank an.
+      Tage, die es schon gibt, werden <strong>nicht überschrieben</strong>. Deine Änderungen in der App bleiben also erhalten.</p>
+
+    <p id="status" class="muted">Lädt …</p>
+    <button id="btn-login" class="btn primary" hidden>Mit Google anmelden</button>
+
+    <div id="preview" hidden>
+      <p id="summary"></p>
+      <button id="btn-import" class="btn primary">Jetzt importieren</button>
+      <div id="list"></div>
+    </div>
+    <p id="result" role="status"></p>
+  </main>
+  <script type="module" src="js/import.js"></script>
+</body>
+</html>

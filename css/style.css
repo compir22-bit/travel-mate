@@ -144,6 +144,19 @@ main {
 }
 .card.today .card-head strong { font-size: 1.25rem; }
 
+.flight {
+  margin-top: .75rem;
+  padding: .75rem;
+  border-radius: .5rem;
+  background: var(--bg);
+  border-left: 4px solid var(--accent);
+}
+.flight p { margin: 0; }
+.flight .btn { display: inline-flex; align-items: center; margin-top: .5rem; text-decoration: none; }
+.flight-title { font-weight: 700; }
+.flight-at { font-weight: 600; color: var(--accent); }
+.flight-form summary { cursor: pointer; margin-bottom: .5rem; }
+
 .past { margin-top: 1rem; }
 .past summary { cursor: pointer; color: var(--muted); }
 .past .card { opacity: .7; }

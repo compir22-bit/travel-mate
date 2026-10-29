@@ -1,0 +1,9 @@
+# Private Daten – niemals ins öffentliche Repository
+import/*.csv
+import/*.json
+*.local.*
+
+# System / Editor
+.DS_Store
+Thumbs.db
+.vscode/

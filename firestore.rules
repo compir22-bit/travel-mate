@@ -1,0 +1,40 @@
+rules_version = '2';
+
+// Diese Regeln werden in der Firebase-Konsole eingefügt (Firestore → Regeln).
+// Grundsatz: Alles ist gesperrt, ausser für Mitglieder der Gästeliste.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null && request.auth.token.email_verified == true;
+    }
+
+    // Mitglied = es gibt ein Dokument members/<e-mail-adresse>
+    function isMember() {
+      return signedIn()
+        && exists(/databases/$(database)/documents/members/$(request.auth.token.email));
+    }
+
+    // Gästeliste: Jede angemeldete Person darf nur ihr eigenes Dokument abfragen.
+    // Gepflegt wird die Liste ausschliesslich von Hand in der Firebase-Konsole.
+    match /members/{email} {
+      allow get: if signedIn() && request.auth.token.email == email;
+      allow list, create, update, delete: if false;
+    }
+
+    // Stationen der Reiseroute (Feldprüfung kommt in Etappe 2)
+    match /stops/{id} {
+      allow read, write: if isMember();
+    }
+
+    // Favoriten aus Google Maps (Feldprüfung kommt in Etappe 4)
+    match /pois/{id} {
+      allow read, write: if isMember();
+    }
+
+    // Alles andere bleibt gesperrt.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

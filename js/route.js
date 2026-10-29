@@ -33,8 +33,8 @@ function formatDate(isoDate) {
   });
 }
 
-function stopCard(stop) {
-  const card = el("article", "card");
+function stopCard(stop, isToday) {
+  const card = el("article", isToday ? "card today" : "card");
   const head = el("div", "card-head");
   head.append(el("strong", "", (stop.time ? stop.time + " · " : "") + stop.title));
   const edit = el("button", "btn small", "Bearbeiten");
@@ -47,23 +47,58 @@ function stopCard(stop) {
   return card;
 }
 
+// Stationen nach Tagen gruppiert in `container` einfügen.
+function renderDays(container, dayStops, today) {
+  let lastDate = null;
+  for (const stop of dayStops) {
+    const isToday = stop.date === today;
+    if (stop.date !== lastDate) {
+      lastDate = stop.date;
+      const heading = el("h3", isToday ? "day today" : "day");
+      heading.append(document.createTextNode(formatDate(stop.date)));
+      if (isToday) heading.append(el("span", "badge", "Heute"));
+      container.append(heading);
+    }
+    container.append(stopCard(stop, isToday));
+  }
+}
+
+let pastOpen = false;
+let renderedDay = null;
+
 function render() {
   const list = $("route-list");
   list.replaceChildren();
   $("route-empty").hidden = stops.length > 0;
+  if (stops.length === 0) return;
 
   const today = todayString();
-  let lastDate = null;
-  for (const stop of stops) {
-    if (stop.date !== lastDate) {
-      lastDate = stop.date;
-      const heading = el("h3", "day", formatDate(stop.date));
-      if (stop.date === today) heading.append(el("span", "badge", "Heute"));
-      list.append(heading);
-    }
-    list.append(stopCard(stop));
+  renderedDay = today;
+  const past = stops.filter((s) => s.date < today);
+  const current = stops.filter((s) => s.date >= today);
+
+  // Vergangene Tage stehen eingeklappt oben, damit der heutige Tag im Blick bleibt.
+  if (past.length > 0) {
+    const details = el("details", "past");
+    details.open = pastOpen;
+    details.addEventListener("toggle", () => { pastOpen = details.open; });
+    details.append(el("summary", "", `Vergangene Tage (${past.length} Stationen)`));
+    renderDays(details, past, today);
+    list.append(details);
   }
+
+  if (!current.some((s) => s.date === today)) {
+    const heading = el("h3", "day today");
+    heading.append(document.createTextNode(formatDate(today)), el("span", "badge", "Heute"));
+    list.append(heading, el("p", "card today muted", "Heute ist nichts geplant."));
+  }
+  renderDays(list, current, today);
 }
+
+// Läuft die App über Mitternacht, wechselt „Heute“ automatisch auf den neuen Tag.
+setInterval(() => {
+  if (renderedDay && renderedDay !== todayString()) render();
+}, 30000);
 
 function setFormError(text) {
   $("stop-error").textContent = text;

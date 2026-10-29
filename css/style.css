@@ -90,6 +90,22 @@ main {
   margin: 0 auto;
 }
 
+.clock-local, .clock-home {
+  margin-bottom: .75rem;
+  padding: 1rem;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: .75rem;
+}
+.clock-local { border-color: var(--accent); }
+.clock-home { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+.clock-home p, .clock-local p { margin: 0; }
+.clock-label { font-size: .875rem; color: var(--muted); }
+.clock-time { font-size: 3rem; font-weight: 700; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.clock-date { text-transform: capitalize; }
+.clock-home-right { text-align: right; }
+.clock-home-time { font-size: 1.5rem; font-weight: 600; font-variant-numeric: tabular-nums; }
+
 .row { display: flex; align-items: center; gap: .5rem; }
 .row .grow { flex: 1; min-width: 0; }
 .row h2 { margin: 0; }
@@ -119,6 +135,19 @@ main {
   border: 1px solid var(--line);
   border-radius: .75rem;
 }
+/* Der heutige Tag ist grösser und hervorgehoben als die kommenden Tage. */
+.day.today { margin-top: 1.5rem; font-size: 1.375rem; }
+.card.today {
+  padding: 1rem 1.25rem;
+  border: 2px solid var(--accent);
+  font-size: 1.125rem;
+}
+.card.today .card-head strong { font-size: 1.25rem; }
+
+.past { margin-top: 1rem; }
+.past summary { cursor: pointer; color: var(--muted); }
+.past .card { opacity: .7; }
+
 .card-head { display: flex; align-items: center; gap: .5rem; }
 .card .line { margin: .25rem 0 0; overflow-wrap: anywhere; white-space: pre-wrap; }
 

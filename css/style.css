@@ -90,6 +90,62 @@ main {
   margin: 0 auto;
 }
 
+.row { display: flex; align-items: center; gap: .5rem; }
+.row .grow { flex: 1; min-width: 0; }
+.row h2 { margin: 0; }
+
+.day {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  margin: 1.25rem 0 .5rem;
+  font-size: 1rem;
+  text-transform: capitalize;
+}
+.badge {
+  padding: 0 .5rem;
+  border-radius: 1rem;
+  background: var(--accent);
+  color: var(--accent-text);
+  font-size: .75rem;
+  font-weight: 600;
+  text-transform: none;
+}
+
+.card {
+  margin-bottom: .5rem;
+  padding: .75rem 1rem;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: .75rem;
+}
+.card-head { display: flex; align-items: center; gap: .5rem; }
+.card .line { margin: .25rem 0 0; overflow-wrap: anywhere; white-space: pre-wrap; }
+
+dialog {
+  width: min(32rem, calc(100vw - 1rem));
+  max-height: calc(100dvh - 1rem);
+  padding: 1rem;
+  border: 1px solid var(--line);
+  border-radius: .75rem;
+  background: var(--surface);
+  color: var(--text);
+}
+dialog::backdrop { background: rgb(0 0 0 / .5); }
+
+.form { display: flex; flex-direction: column; gap: .75rem; }
+.form label { display: flex; flex-direction: column; gap: .25rem; font-size: .875rem; color: var(--muted); }
+.form input, .form textarea {
+  font: inherit;
+  font-size: 1rem; /* verhindert das automatische Zoomen auf iPhones */
+  padding: .5rem .625rem;
+  border: 1px solid var(--line);
+  border-radius: .5rem;
+  background: var(--bg);
+  color: var(--text);
+}
+.btn.danger { color: var(--error); }
+
 .tabbar {
   position: fixed;
   left: 0;

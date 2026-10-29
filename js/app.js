@@ -1,5 +1,6 @@
 // Start der App: Anzeige je nach Anmeldestatus und Tab-Navigation.
 import { watchAuth, login, logout } from "./auth.js";
+import { startRoute, stopRoute } from "./route.js";
 
 const $ = (id) => document.getElementById(id);
 const screens = ["loading", "login", "denied", "app"];
@@ -42,12 +43,14 @@ for (const tab of document.querySelectorAll(".tab")) {
 }
 
 watchAuth((state, user) => {
+  if (state !== "member") stopRoute();
   if (state === "out") return showScreen("login");
   if (state === "denied") {
     $("denied-email").textContent = user.email || "";
     return showScreen("denied");
   }
   $("user-name").textContent = user.displayName || user.email;
+  startRoute(user);
   showTab("route");
   showScreen("app");
 });

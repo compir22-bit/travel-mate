@@ -22,9 +22,31 @@ service cloud.firestore {
       allow list, create, update, delete: if false;
     }
 
-    // Stationen der Reiseroute (Feldprüfung kommt in Etappe 2)
+    // Prüft die Felder einer Station (Typ, Länge, erlaubte Feldnamen).
+    function validStop(d) {
+      return d.keys().hasOnly(['date', 'time', 'title', 'place', 'accommodation', 'notes',
+                               'lat', 'lng', 'createdBy', 'updatedAt'])
+        && d.keys().hasAll(['date', 'time', 'title', 'place', 'accommodation', 'notes',
+                            'createdBy', 'updatedAt'])
+        && d.date is string && d.date.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')
+        && d.time is string && d.time.size() <= 5
+        && d.title is string && d.title.size() >= 1 && d.title.size() <= 100
+        && d.place is string && d.place.size() <= 100
+        && d.accommodation is string && d.accommodation.size() <= 100
+        && d.notes is string && d.notes.size() <= 1000
+        && (!('lat' in d) || (d.lat is number && d.lat >= -90 && d.lat <= 90))
+        && (!('lng' in d) || (d.lng is number && d.lng >= -180 && d.lng <= 180))
+        && d.updatedAt == request.time;
+    }
+
+    // Stationen der Reiseroute
     match /stops/{id} {
-      allow read, write: if isMember();
+      allow read: if isMember();
+      allow create: if isMember() && validStop(request.resource.data)
+        && request.resource.data.createdBy == request.auth.token.email;
+      allow update: if isMember() && validStop(request.resource.data)
+        && request.resource.data.createdBy == resource.data.createdBy;
+      allow delete: if isMember();
     }
 
     // Favoriten aus Google Maps (Feldprüfung kommt in Etappe 4)
